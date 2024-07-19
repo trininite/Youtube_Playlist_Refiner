@@ -1,0 +1,14 @@
+/config/dev_config.json
+
+__pycache__/
+*.py[cod]
+
+.vscode/
+
+TODO
+
+*.log
+
+output/*
+
+/lib/yt-dlp.exe
