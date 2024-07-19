@@ -12,3 +12,6 @@ TODO
 output/*
 
 /lib/yt-dlp.exe
+
+__pycache__
+*.pyc
