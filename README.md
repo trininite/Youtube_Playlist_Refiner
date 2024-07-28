@@ -1,8 +1,5 @@
 # Youtube_Playlist_Refiner
 
-
-
-
 TODO
 
 clearup variable names, especially for vdc
@@ -22,4 +19,5 @@ vdc variable names
     scraped data:
         video title
         channel name
+
 
