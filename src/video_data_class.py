@@ -1,47 +1,46 @@
-from selenium import webdriver
-from selenium.webdriver.common.by import By 
+import json
+from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webelement import WebElement
+
+
 class video_data_class:
-    def __init__(self, ytd_video_renderer, user_video_title, video_author):
+    def __init__(self, ytd_video_renderer :WebElement, song_info :tuple, output_dir :str):
 
         self.ytd_video_renderer = ytd_video_renderer
 
-        video_info = self.get_video_info()
-        assert video_info is not None
-        self.video_title = video_info[0]
-        self.video_link = video_info[1]
-        self.view_count = video_info[2]
+        # assigns video_link, video_title, and view_count
+        self.video_title, self.video_link, self.view_count = self.get_video_info()
 
-        thumbnail_info = self.get_thumbnail()
-        assert thumbnail_info is not None
-        self.thumbnail_link = thumbnail_info
+        # assigns thumbnail_link
+        self.thumbnail_link = self.get_thumbnail()
 
-        channel_info = self.get_channel_info()
-        assert channel_info is not None
-        self.channel_link = channel_info[0]
-        self.channel_name = channel_info[1]
+        # assigns channel_link and channel_name
+        self.channel_name, self.channel_link = self.get_channel_info()
 
-        self.user_video_title = user_video_title
-        self.video_author = video_author
-        self.complete_title = f"{self.user_video_title} - {self.video_author}"
+        # assigns values from user input
+        self.song_title, self.artist = song_info
 
-        
-        
-        
+        # used for prompting user and searching for song
+        self.complete_title = f"{self.song_title} - {self.artist}"
 
 
-        #TODO
-        self.file_name = ""
-        
+        self.file_name = f"{self.complete_title}.mp3".replace(" ", "_")
+        self.file_location = f"{output_dir}/{self.file_name}"
+
+        self.file_hex = None
 
 
 
     def get_video_info(self):
         #find <a> element with id "video-title"
-        user_video_title_anchor = self.ytd_video_renderer.find_element(By.CSS_SELECTOR, "a#video-title")
-        video_link = user_video_title_anchor.get_attribute("href")
+        video_title_anchor = self.ytd_video_renderer.find_element(By.CSS_SELECTOR, "a#video-title")
+        video_link = video_title_anchor.get_attribute("href") #RETURNED
+        
+        if '&' in video_link:
+            video_link = video_link.split('&')[0]
 
-        yt_formatted_string = user_video_title_anchor.find_element(By.TAG_NAME, "yt-formatted-string")
-        user_video_title = yt_formatted_string.get_attribute("innerHTML")
+        yt_formatted_string = video_title_anchor.find_element(By.TAG_NAME, "yt-formatted-string")
+        video_title = yt_formatted_string.get_attribute("innerHTML")
 
         aria_label = yt_formatted_string.get_attribute("aria-label")
         sections = aria_label.split(" ")
@@ -50,26 +49,26 @@ class video_data_class:
             views_str_index = sections.index("views")
             view_count_index = views_str_index - 1 if views_str_index > 0 else None
         if view_count_index is None:
-            raise Exception("view_count_index is less than 0")
+            self.view_count = 0
+            return
+            
 
-        view_count = sections[view_count_index]       
-
-        return(user_video_title, video_link, view_count)
+        view_count = sections[view_count_index]
         
+        return video_title, video_link, view_count
+
 
     def get_thumbnail(self):
         ytd_thumbnail = self.ytd_video_renderer.find_element(By.TAG_NAME, "ytd-thumbnail")
         yt_image = ytd_thumbnail.find_element(By.TAG_NAME, "yt-image")
         inner_image = yt_image.find_element(By.TAG_NAME, "img")
-        
+    
         thumbnail_link = inner_image.get_attribute("src")
-        
+    
         if thumbnail_link is None:
             thumbnail_link = "None"
-
-
-
-        return(thumbnail_link)
+    
+        return thumbnail_link
 
 
     def get_channel_info(self):
@@ -80,14 +79,62 @@ class video_data_class:
 
         channel_link = channel_anchor.get_attribute("href")
         channel_name = channel_anchor.get_attribute("innerHTML")
-        
-        return(channel_name, channel_link)
-    
-    def print_info(self):
-        print(f"Video Info:\nVideo Title: {self.video_title}\nChannel Name: {self.channel_name}\nView Count: {self.view_count}\n")
-        print(f"Links:\nVideo Link: {self.video_link}\nChannel Link: {self.channel_link}\nThumbnail Link: {self.thumbnail_link}")
-    
-    def gen_hex(self, output_dir :str):
-        self.file_path = f"{output_dir}/{self.complete_title}.mp3"
 
-        self.file_hex =self.file_path.encode('utf-8').hex()
+        return channel_link, channel_name
+    
+    def print_info(self) -> None:
+        """
+        Print the video information and links.
+
+        This function prints the video information and links. It includes the video title,
+        channel name, and view count. It also includes the video link, channel link,
+        and thumbnail link.
+
+        Parameters:
+            self (object): The instance of the class.
+
+        Returns:
+            None
+        """
+        print(f"Video Info:\n\
+                    Video Title: {self.video_title}\n\
+                    Channel Name: {self.channel_name}\n\
+                    View Count: {self.view_count}\
+                ")
+        print(f"Links:\n\
+                    Video Link: {self.video_link}\n\
+                    Channel Link: {self.channel_link}\n\
+                    Thumbnail Link: {self.thumbnail_link}\
+                    ")
+
+
+    def gen_hex(self):
+        self.file_hex :str = self.file_location.encode('utf-8').hex()
+
+
+    def log_meta_data(self, output_directory : str) -> None:
+        """
+        Writes the metadata of a video to a JSON file.
+
+        Args:
+            video_object (video_data_class): An instance of the video_data_class
+            containing the metadata of the video.
+
+            output_directory (str): The directory where the JSON file will be saved.
+
+        Returns:
+            Dict
+        """
+
+        metadata = {
+            "title": self.song_title,
+            "artist": self.artist,
+            "video_link": self.video_link,
+            "thumbnail_link": self.thumbnail_link,
+            "channel_name": self.channel_name,
+            "channel_link": self.channel_link,
+            "hex": self.file_hex
+        }
+
+        with open(f"{output_directory}/metadata.json", "w+", encoding="utf-8") as f:
+            json.dump(metadata, f, indent=4)
