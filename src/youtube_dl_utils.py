@@ -1,20 +1,24 @@
 from youtube_dl import YoutubeDL
-from os import system, getcwd
-import video_data_class
+from youtube_dl import DownloadError
+from os import system, getcwd, listdir
+from video_data_class import video_data_class
 from logging import Logger
 import re
 
-def download_playlist_titles(playlist_url):
+def download_playlist_titles(playlist_url :str):
     ydl_opts = {
         'quiet': True,  
         'extract_flat': True,  
     }
-
-    with YoutubeDL(ydl_opts) as ydl:
-        playlist_info = ydl.extract_info(playlist_url, download=False)
-        playlist_title = playlist_info.get('title', None)
-        video_titles = [video['title'] for video in playlist_info['entries']]
-        playlist_info = (playlist_title, video_titles)
+    try:
+        with YoutubeDL(ydl_opts) as ydl:
+            playlist_info = ydl.extract_info(playlist_url, download=False)
+            playlist_title = playlist_info.get('title', None)
+            video_titles = [video['title'] for video in playlist_info['entries']]
+            playlist_info = (playlist_title, video_titles)
+    except DownloadError as e:
+        print(e)
+        print("Error downloading playlist. Try disabling VPN")
     
     playlist_title = playlist_info[0]
     video_titles = playlist_info[1]
@@ -25,17 +29,7 @@ def download_playlist_titles(playlist_url):
 
 
 
-
-
-def sanitize_url(url):
-    if '&' in url:
-        url = url.split('&')[0]
-    return url
-
-def sanitize_title(title):
-    return title.replace(" ", "_")
-
-def bin_download_video(vdc: video_data_class, output_directory: str, logger: Logger) -> int:
+def bin_download_video(video_object: video_data_class, logger: Logger) -> int:
     """Download a video using yt-dlp and save it to the output directory.
 
     Args:
@@ -47,17 +41,18 @@ def bin_download_video(vdc: video_data_class, output_directory: str, logger: Log
 
     """
 
-    video_link = sanitize_url(vdc.video_link)
-    output_template = f'./output/{sanitize_title(vdc.complete_title)}.mp3'
-    BASE_CMD = f'lib\yt-dlp.exe -f "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best" -x --audio-format mp3'
+    file_type_option = "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
+    extraction_option = "-x --audio-format mp3"
+    BASE_CMD = f'lib\\yt-dlp.exe -f {file_type_option} {extraction_option}'
 
     
     for i in range(5):
         try:
-            #print(f'{BASE_CMD} -o "{output_template}" {vdc.video_link}')
-            system(f'{BASE_CMD} -o "{output_template}" {video_link}')
-        except Exception as e:
-            logger.error(f"Failed to download {vdc.complete_title}. Exception: {e}. Retrying...")
+            #print(f'{BASE_CMD} -o "{output_template}" {video_object.video_link}')
+            final_command = f'{BASE_CMD} -o {video_object.file_location} {video_object.video_link}'
+            system(final_command)
+        except DownloadError as e:
+            logger.error(f"Failed to download {video_object.complete_title}. Exception: {e}. Retrying...")
             if i < 4:
                 continue
             return e
@@ -66,7 +61,24 @@ def bin_download_video(vdc: video_data_class, output_directory: str, logger: Log
 
     return 1
 
+def download_all(video_data_objects :list, logger: Logger):
+    video_object :video_data_class
+    for video_object in video_data_objects:
+        logger.info("Downloading %s", video_object.complete_title)
+        res = bin_download_video(video_object, logger)
 
+        if isinstance(res, Exception):
+            logger.error("%s failed to download. Exception: %s", video_object.complete_title, res)
+            video_object.file_hex, video_object.file_name = None, None
+            return
+        
+        logger.info("%s downloaded successfully", video_object.complete_title)
+        video_object.gen_hex()
+
+
+
+
+# unused/old
 def _lib_download_video(video_data_class):
     custom_outtmpl = f'./output/{video_data_class.complete_title}.%(ext)s'
     ydl_opts = {
@@ -98,4 +110,3 @@ def _test_bin_download_video(title, link):
     #system(f'{base_cmd} ')
 
     system(f'{base_cmd} -o "{output_template}" {link}')
-
