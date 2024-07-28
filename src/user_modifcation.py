@@ -23,8 +23,6 @@ def get_user_title(old_title):
     title = input("Title: ")
     artist = input("Artist: ")
 
-    
-
     if title == "cur":
         title = old_title
 
