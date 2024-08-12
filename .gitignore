@@ -9,9 +9,11 @@ TODO
 
 *.log
 
-output/*
+output
 
 /lib/yt-dlp.exe
 
 __pycache__
 *.pyc
+
+venv
