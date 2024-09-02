@@ -5,7 +5,20 @@ from logging import Logger
 import urllib.request
 import platform
 
-def download_executable():
+def download_executable() -> None:
+    """
+    Downloads the yt-dlp executable for the current operating system.
+
+    Parameters:
+        None
+
+    Returns:
+        None
+
+    Raises:
+        Exception: If the current operating system is not supported.
+
+    """
     os = platform.system()
     match os:
         case "Linux":
@@ -30,6 +43,15 @@ def download_executable():
         
 
 def download_playlist_titles(playlist_url :str):
+    """
+    Downloads the titles of a YouTube playlist.
+
+    Parameters:
+        playlist_url (str): The URL of the YouTube playlist.
+
+    Returns:
+        tuple: A tuple containing the title of the playlist and a list of video titles.
+    """
     ydl_opts = {
         'quiet': True,   
         'extract_flat': True,  
@@ -59,6 +81,9 @@ def bin_download_video(video_object: video_data_class, logger: Logger) -> int:
     Args:
         video_data_class (video_data_class): An instance of video_data_class
             containing the complete_title and video_link of the video to download.
+
+        logger (Logger): An instance of Logger for logging important runtime 
+            information
 
     Returns:
         int: 1 if the video was downloaded successfully, 0 otherwise.
@@ -100,6 +125,16 @@ def bin_download_video(video_object: video_data_class, logger: Logger) -> int:
     return 1
 
 def download_all(video_data_objects :list, logger: Logger):
+    """
+    Downloads a list of video data objects using the bin_download_video function.
+
+    Args:
+        video_data_objects (list): A list of video_data_class objects to be downloaded.
+        logger (Logger): A logger object used for logging download information.
+
+    Returns:
+        None
+    """
     video_object :video_data_class
     for video_object in video_data_objects:
         logger.info("Downloading %s", video_object.complete_title)
