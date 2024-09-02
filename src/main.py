@@ -1,6 +1,6 @@
 # standard
 import datetime
-from os import mkdir
+from os import mkdir, listdir
 #import json
 
 # custom
@@ -33,6 +33,9 @@ def main():
     #import config data
     #main_playlist = ""
     new_playlist = "https://www.youtube.com/playlist?list=PLqj_PfKdlkzdEfBQPW1dnnGc_whfcbxO0"
+    
+    #check for yt-dlp binary
+    youtube_dl_utils.download_executable()
 
     #download song titles
     new_playlist_info = youtube_dl_utils.download_playlist_titles(new_playlist)

@@ -3,9 +3,11 @@ from os import system, getcwd, path
 from video_data_class import video_data_class
 from logging import Logger
 import urllib.request
+import platform
 
-def download_executable(platform :str):
-    match platform:
+def download_executable():
+    os = platform.system()
+    match os:
         case "Linux":
             if path.exists("./lib/yt-dlp_linux"):
                 return
@@ -51,7 +53,7 @@ def download_playlist_titles(playlist_url :str):
 
 
 
-def bin_download_video(video_object: video_data_class, logger: Logger, platform :str) -> int:
+def bin_download_video(video_object: video_data_class, logger: Logger) -> int:
     """Download a video using yt-dlp and save it to the output directory.
 
     Args:
@@ -68,7 +70,8 @@ def bin_download_video(video_object: video_data_class, logger: Logger, platform 
     BASE_CMD_WINDOWS = f'lib\\yt-dlp.exe -f {file_type_option} {extraction_option}'
     BASE_CMD_BASH = f'bash lib\\yt-dlp_linux -f {file_type_option} {extraction_option}'
 
-    match platform:
+    os = platform.system()
+    match os:
         case "Linux":
             BASE_CMD = BASE_CMD_BASH
         case "Windows":
