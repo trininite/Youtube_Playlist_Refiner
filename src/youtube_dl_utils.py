@@ -1,13 +1,35 @@
-from youtube_dl import YoutubeDL
-from youtube_dl import DownloadError
-from os import system, getcwd, listdir
+from youtube_dl import YoutubeDL, DownloadError
+from os import system, getcwd, path
 from video_data_class import video_data_class
 from logging import Logger
-import re
+import urllib.request
+
+def download_executable(platform :str):
+    match platform:
+        case "Linux":
+            if path.exists("./lib/yt-dlp_linux"):
+                return
+            url = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux"
+
+        case "Windows":
+            if path.exists("./lib/yt-dlp.exe"):
+                return
+            url = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe"
+
+        case "Mac":
+            print("fuck you")
+            system("reboot")
+            quit()
+
+        case _:
+            raise Exception("Invalid System Type")
+        
+    urllib.request.urlretrieve(url, url.split("/")[-1])
+        
 
 def download_playlist_titles(playlist_url :str):
     ydl_opts = {
-        'quiet': True,  
+        'quiet': True,   
         'extract_flat': True,  
     }
     try:
@@ -29,7 +51,7 @@ def download_playlist_titles(playlist_url :str):
 
 
 
-def bin_download_video(video_object: video_data_class, logger: Logger) -> int:
+def bin_download_video(video_object: video_data_class, logger: Logger, platform :str) -> int:
     """Download a video using yt-dlp and save it to the output directory.
 
     Args:
@@ -43,9 +65,22 @@ def bin_download_video(video_object: video_data_class, logger: Logger) -> int:
 
     file_type_option = "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
     extraction_option = "-x --audio-format mp3"
-    BASE_CMD = f'lib\\yt-dlp.exe -f {file_type_option} {extraction_option}'
+    BASE_CMD_WINDOWS = f'lib\\yt-dlp.exe -f {file_type_option} {extraction_option}'
+    BASE_CMD_BASH = f'bash lib\\yt-dlp_linux -f {file_type_option} {extraction_option}'
 
-    
+    match platform:
+        case "Linux":
+            BASE_CMD = BASE_CMD_BASH
+        case "Windows":
+            BASE_CMD = BASE_CMD_WINDOWS
+        case "Mac":
+            print("fuck you")
+            system("reboot")
+            quit()
+        case _:
+            raise Exception("Invalid System Type")
+
+
     for i in range(5):
         try:
             #print(f'{BASE_CMD} -o "{output_template}" {video_object.video_link}')
