@@ -1,5 +1,5 @@
 from youtube_dl import YoutubeDL, DownloadError
-from os import system, getcwd, path
+from os import system, getcwd, path, chmod
 from video_data_class import video_data_class
 from logging import Logger
 import urllib.request
@@ -25,11 +25,14 @@ def download_executable() -> None:
             if path.exists("./lib/yt-dlp_linux"):
                 return
             url = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux"
+            urllib.request.urlretrieve(url, url.split("/")[-1])
+            chmod("./lib/yt-dlp_linux", 0o755)
 
         case "Windows":
             if path.exists("./lib/yt-dlp.exe"):
                 return
             url = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe"
+            urllib.request.urlretrieve(url, url.split("/")[-1])
 
         case "Mac":
             print("fuck you")
@@ -39,7 +42,7 @@ def download_executable() -> None:
         case _:
             raise Exception("Invalid System Type")
         
-    urllib.request.urlretrieve(url, url.split("/")[-1])
+    
         
 
 def download_playlist_titles(playlist_url :str):
@@ -76,7 +79,8 @@ def download_playlist_titles(playlist_url :str):
 
 
 def bin_download_video(video_object: video_data_class, logger: Logger) -> int:
-    """Download a video using yt-dlp and save it to the output directory.
+    """
+    Download a video using yt-dlp and save it to the output directory.
 
     Args:
         video_data_class (video_data_class): An instance of video_data_class
@@ -87,13 +91,12 @@ def bin_download_video(video_object: video_data_class, logger: Logger) -> int:
 
     Returns:
         int: 1 if the video was downloaded successfully, 0 otherwise.
-
     """
 
     file_type_option = "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
     extraction_option = "-x --audio-format mp3"
     BASE_CMD_WINDOWS = f'lib\\yt-dlp.exe -f {file_type_option} {extraction_option}'
-    BASE_CMD_BASH = f'bash lib\\yt-dlp_linux -f {file_type_option} {extraction_option}'
+    BASE_CMD_BASH = f'lib/yt-dlp_linux -f {file_type_option} {extraction_option}'
 
     os = platform.system()
     match os:
