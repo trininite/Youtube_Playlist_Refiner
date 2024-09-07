@@ -3,7 +3,7 @@ import datetime
 
 def create_logger(playlist_name):
     from os import listdir
-    print(listdir())
+    #print(listdir())
     time = datetime.datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
 
     with open(f"log/{playlist_name}_{time}.log", "w+") as f:
