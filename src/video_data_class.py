@@ -1,7 +1,12 @@
 import json
+
+from os import path
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 
+#from mutagen.easyid3 import EasyID3
+from mutagen.id3 import ID3, ID3NoHeaderError, TIT2, TPE1, WOAS, WOAR, TXXX
 
 class video_data_class:
     def __init__(self, ytd_video_renderer :WebElement, song_info :tuple, output_dir :str):
@@ -28,6 +33,7 @@ class video_data_class:
         self.file_location = f"{output_dir}/{self.file_name}"
 
         self.file_hex = None
+        self.metadata = None
 
 
 
@@ -105,7 +111,7 @@ class video_data_class:
                     Video Link: {self.video_link}\n\
                     Channel Link: {self.channel_link}\n\
                     Thumbnail Link: {self.thumbnail_link}\
-                    ")
+                ")
 
 
     def gen_hex(self):
@@ -126,7 +132,7 @@ class video_data_class:
             Dict
         """
 
-        metadata = {
+        self.metadata = {
             "title": self.song_title,
             "artist": self.artist,
             "video_link": self.video_link,
@@ -137,4 +143,32 @@ class video_data_class:
         }
 
         with open(f"{output_directory}/metadata.json", "w+", encoding="utf-8") as f:
-            json.dump(metadata, f, indent=4)
+            json.dump(self.metadata, f, indent=4)
+
+    def attach_meta_data(self) -> None:
+        assert path.exists(self.file_location), "mp3 failed to download"
+        assert hasattr(self, "metadata"), "metadata uninitialized"
+
+        try:
+            audio = ID3(self.file_location)
+        except ID3NoHeaderError as e:
+            raise ID3NoHeaderError("mp3 failed to download") from e
+
+        # tags
+        TITLE = "TIT2"
+        ARTIST = "TPE1"
+        VIDEO_LINK = "WOAS"
+        CHANNEL_LINK = "WOAR"
+        CUSTOM = "TXXX"
+
+        # standard tags
+        audio[TITLE] = TIT2(encoding=3, text=self.metadata["title"])
+        audio[ARTIST] = TPE1(encoding=3, text=self.metadata["artist"])
+        audio[VIDEO_LINK] = WOAS(url=self.metadata["video_link"])
+        audio[CHANNEL_LINK] = WOAR(url=self.metadata["channel_link"])
+
+        # custom tags
+        audio[CUSTOM] = TXXX(encoding=3, desc="hex", text=self.metadata["hex"])
+
+        audio.save()
+        

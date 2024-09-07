@@ -1,6 +1,8 @@
+#!usr/bin/env python3
+
 # standard
 import datetime
-from os import mkdir, listdir
+from os import mkdir, chdir, path
 #import json
 
 # custom
@@ -12,9 +14,9 @@ from user_modifcation import user_modification
 #from user_video_choice import user_choice
 
 
-
 def main():
-
+    main_file_path = path.dirname(path.realpath(__file__))
+    chdir(f"../{main_file_path}")
 
     # import config data
     # download new playlist titles
@@ -43,10 +45,15 @@ def main():
     new_playlist_titles = new_playlist_info[1][:1] # unrefined playlist titles
 
     #setup logging
+    if not path.exists(f"./log/"):
+        mkdir(f"./log/")
+        
     logger = log.create_logger(new_playlist_name)
 
 
     #create output directory
+    if not path.exists(f"./output/"):
+        mkdir(f"./output/")
     output_directory = f"./output/{new_playlist_name}_{start_time}"
     mkdir(output_directory)
     #create metadata file
@@ -82,6 +89,7 @@ def main():
     video_object :video_data_class
     for video_object in video_objects:
         video_object.log_meta_data(output_directory)
+        video_object.attach_meta_data()
 
 
 
