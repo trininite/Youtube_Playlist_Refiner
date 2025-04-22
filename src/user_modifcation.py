@@ -18,7 +18,8 @@ def confirm_user_choice(new_title, old_title):
 
 def get_user_title(old_title):
     clear_terminal.clear_terminal()
-    print("Enter the prompted information based on the title below (type 'cur' for the title to copy the old title):")
+    print("Enter the prompted information based on the title below")
+    print("(type 'cur' for the title to copy the old title)")
     print(old_title)
     title = input("Title: ")
     artist = input("Artist: ")
@@ -31,10 +32,10 @@ def get_user_title(old_title):
         title_info = (title, artist)
 
         new_title = f"{title} - {artist}"
-        if confirm_user_choice(new_title, old_title) == True:
+        if confirm_user_choice(new_title, old_title) is True:
             return title_info
     else:
-        return(get_user_title(old_title))
+        return get_user_title(old_title)
 
 
 def user_modification(old_titles: list, logger):

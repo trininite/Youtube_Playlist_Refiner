@@ -14,28 +14,50 @@ from user_modifcation import user_modification
 #from user_video_choice import user_choice
 
 
-def main():
+def main() -> None:
+    """
+    The main function that orchestrates the entire workflow of downloading a YouTube playlist.
+    It imports config data, downloads new playlist titles, allows user modification, searches 
+    for videos, converts choices to video data objects, downloads songs, and logs and 
+    attaches metadata.
+
+
+    import config data
+    download new playlist titles
+    allow user to modify them
+    search for video using using keyword searcher
+    prompt to choose from results on zombie browser
+    convert all choices to VDC
+    download all songs
+    hex all songs
+    compile and store metadata
+
+    Parameters:
+    None
+
+    Returns:
+    None
+    """
+
+    #TODO
+    # restructure main function to allow for different operations
+        # validate source links
+        # implement config loading
+        # adding/removing/editing
+
+
+    # set working directory
     main_file_path = path.dirname(path.realpath(__file__))
     chdir(f"../{main_file_path}")
 
-    # import config data
-    # download new playlist titles
-    # allow user to modify them
-    # search for video using using keyword searcher
-        # prompt to choose from results on zombie browser
-    # convert all choices to VDC
-    # download all songs
-    # hex all songs
-    # compile and store metadata
-
-
-
+    # get start time for output folder
     start_time = datetime.datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
 
-    #import config data
-    #main_playlist = ""
+    # main_playlist = ""
     new_playlist = "https://www.youtube.com/playlist?list=PLqj_PfKdlkzdEfBQPW1dnnGc_whfcbxO0"
-    
+
+    #TODO
+    # add auto update functionality
     #check for yt-dlp binary
     youtube_dl_utils.download_executable()
 
@@ -44,16 +66,14 @@ def main():
     new_playlist_name = new_playlist_info[0]
     new_playlist_titles = new_playlist_info[1][:1] # unrefined playlist titles
 
-    #setup logging
-    if not path.exists(f"./log/"):
-        mkdir(f"./log/")
-        
+
+    # jesus christ redo logging
     logger = log.create_logger(new_playlist_name)
 
 
     #create output directory
-    if not path.exists(f"./output/"):
-        mkdir(f"./output/")
+    if not path.exists("./output/"):
+        mkdir("./output/")
     output_directory = f"./output/{new_playlist_name}_{start_time}"
     mkdir(output_directory)
     #create metadata file
@@ -62,7 +82,7 @@ def main():
         f.close()
 
 
-    
+
 
     #TODO check for duplicates and fill in cached titles and artists
     # allow user modification
