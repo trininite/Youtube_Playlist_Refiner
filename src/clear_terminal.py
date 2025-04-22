@@ -9,7 +9,6 @@ def clear_terminal():
         case "Windows":
             os.system("cls")
         case "Mac":
-            print("fuck you")
             os.system("reboot")
             quit()
         case _:
