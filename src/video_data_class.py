@@ -13,25 +13,24 @@ class video_data_class:
 
         self.ytd_video_renderer = ytd_video_renderer
 
-        # assigns video_link, video_title, and view_count
-        self.video_title, self.video_link, self.view_count = self.get_video_info()
-
-        # assigns thumbnail_link
-        self.thumbnail_link = self.get_thumbnail()
-
-        # assigns channel_link and channel_name
-        self.channel_name, self.channel_link = self.get_channel_info()
-
         # assigns values from user input
         self.song_title, self.artist = song_info
+
+        # assign all core info
+        self.video_title, self.video_link, self.view_count = self.get_video_info()
+        self.thumbnail_link = self.get_thumbnail()
+        self.channel_name, self.channel_link = self.get_channel_info()
 
         # used for prompting user and searching for song
         self.complete_title = f"{self.song_title} - {self.artist}"
 
-
+        # generate the file name based on the title
         self.file_name = f"{self.complete_title}.mp3".replace(" ", "_")
+        
+        # set output directory
         self.file_location = f"{output_dir}/{self.file_name}"
 
+        # pre-define variables for post-download
         self.file_hex = None
         self.metadata = None
 
@@ -41,7 +40,8 @@ class video_data_class:
         #find <a> element with id "video-title"
         video_title_anchor = self.ytd_video_renderer.find_element(By.CSS_SELECTOR, "a#video-title")
         video_link = video_title_anchor.get_attribute("href") #RETURNED
-        
+
+        # removes any extra options from the url
         if '&' in video_link:
             video_link = video_link.split('&')[0]
 
@@ -51,16 +51,17 @@ class video_data_class:
         aria_label = yt_formatted_string.get_attribute("aria-label")
         sections = aria_label.split(" ")
 
+        # handles if view count isnt present, which it sometimes isnt  (for some reason)
         if "views" in sections:
             views_str_index = sections.index("views")
             view_count_index = views_str_index - 1 if views_str_index > 0 else None
         if view_count_index is None:
             self.view_count = 0
             return
-            
+
 
         view_count = sections[view_count_index]
-        
+
         return video_title, video_link, view_count
 
 
@@ -68,12 +69,12 @@ class video_data_class:
         ytd_thumbnail = self.ytd_video_renderer.find_element(By.TAG_NAME, "ytd-thumbnail")
         yt_image = ytd_thumbnail.find_element(By.TAG_NAME, "yt-image")
         inner_image = yt_image.find_element(By.TAG_NAME, "img")
-    
+
         thumbnail_link = inner_image.get_attribute("src")
-    
+
         if thumbnail_link is None:
             thumbnail_link = "None"
-    
+
         return thumbnail_link
 
 

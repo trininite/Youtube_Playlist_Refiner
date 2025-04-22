@@ -1,12 +1,14 @@
 import logging
 import datetime
+from os import path, mkdir
 
 def create_logger(playlist_name):
-    from os import listdir
-    #print(listdir())
+    if not path.exists("./log/"):
+        mkdir("./log/")
+
     time = datetime.datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
 
-    with open(f"log/{playlist_name}_{time}.log", "w+") as f:
+    with open(f"log/{playlist_name}_{time}.log", "w+", encoding="utf-8") as f:
         f.close()
 
 
@@ -21,5 +23,3 @@ def create_logger(playlist_name):
 
     # Create a logger
     return logging.getLogger(__name__)
-
-

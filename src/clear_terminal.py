@@ -14,3 +14,4 @@ def clear_terminal():
             quit()
         case _:
             raise Exception("Invalid System Type")
+            quit()
