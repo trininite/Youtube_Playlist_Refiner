@@ -1,9 +1,13 @@
-from youtube_dl import YoutubeDL, DownloadError
-from os import system, getcwd, path, chmod
-from video_data_class import video_data_class
+# pylint: disable-msg=C0103
+
 from logging import Logger
 import urllib.request
 import platform
+from os import system, path, chmod
+
+
+from video_data_class import video_data_class
+
 
 def download_executable() -> None:
     """
@@ -25,14 +29,14 @@ def download_executable() -> None:
             if path.exists("./lib/yt-dlp_linux"):
                 return
             url = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux"
-            urllib.request.urlretrieve(url, url.split("/")[-1])
+            urllib.request.urlretrieve(url, url.split("/", maxsplit=1)[-1])
             chmod("./lib/yt-dlp_linux", 0o755)
 
         case "Windows":
             if path.exists("./lib/yt-dlp.exe"):
                 return
             url = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe"
-            urllib.request.urlretrieve(url, url.split("/")[-1])
+            urllib.request.urlretrieve(url, url.split("/", maxsplit=1)[-1])
 
         case "Mac":
             print("fuck you")
@@ -40,10 +44,10 @@ def download_executable() -> None:
             quit()
 
         case _:
-            raise Exception("Invalid System Type")
-        
-    
-        
+            raise RuntimeError("Invalid System Type")
+
+
+
 
 def download_playlist_titles(playlist_url :str):
     """
@@ -68,7 +72,7 @@ def download_playlist_titles(playlist_url :str):
     except DownloadError as e:
         print(e)
         print("Error downloading playlist. Try disabling VPN")
-    
+
     playlist_title = playlist_info[0]
     video_titles = playlist_info[1]
 
@@ -109,7 +113,8 @@ def bin_download_video(video_object: video_data_class, logger: Logger) -> int:
             system("reboot")
             quit()
         case _:
-            raise Exception("Invalid System Type")
+            raise RuntimeError("Invalid System Type")
+
 
 
     for i in range(5):
@@ -118,7 +123,8 @@ def bin_download_video(video_object: video_data_class, logger: Logger) -> int:
             final_command = f'{BASE_CMD} -o {video_object.file_location} {video_object.video_link}'
             system(final_command)
         except DownloadError as e:
-            logger.error(f"Failed to download {video_object.complete_title}. Exception: {e}. Retrying...")
+            title = video_object.complete_title
+            logger.error(f"Failed to download {title}.\ Exception: {e}. Retrying...")
             if i < 4:
                 continue
             return e
@@ -147,7 +153,7 @@ def download_all(video_data_objects :list, logger: Logger):
             logger.error("%s failed to download. Exception: %s", video_object.complete_title, res)
             video_object.file_hex, video_object.file_name = None, None
             return
-        
+     
         logger.info("%s downloaded successfully", video_object.complete_title)
         video_object.gen_hex()
 
@@ -155,34 +161,46 @@ def download_all(video_data_objects :list, logger: Logger):
 
 
 # unused/old
-def _lib_download_video(video_data_class):
-    custom_outtmpl = f'./output/{video_data_class.complete_title}.%(ext)s'
-    ydl_opts = {
-        'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-        'outtmpl': custom_outtmpl,
-    }
+# def _lib_download_video(video_data_class):
+#     custom_outtmpl = f'./output/{video_data_class.complete_title}.%(ext)s'
+#     ydl_opts = {
+#         'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+#         'outtmpl': custom_outtmpl,
+#     }
 
-    with YoutubeDL(ydl_opts) as ydl:
-        ydl.download([video_data_class.video_link])
-
-
-def _test_lib_download_video(title, link):
-    custom_outtmpl = f'./output/{title}.%(ext)s'
-    ydl_opts = {
-        'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-        'outtmpl': custom_outtmpl,
-    }
-
-    with YoutubeDL(ydl_opts) as ydl:
-        ydl.download([link])
+#     with YoutubeDL(ydl_opts) as ydl:
+#         ydl.download([video_data_class.video_link])
 
 
-def _test_bin_download_video(title, link):
-    print(getcwd())
-    base_cmd = 'lib\yt-dlp.exe -f "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"'
-    output_template = f'./output/{title}.%(ext)s'
+# def _test_lib_download_video(title, link):
+#     custom_outtmpl = f'./output/{title}.%(ext)s'
+#     ydl_opts = {
+#         'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+#         'outtmpl': custom_outtmpl,
+#     }
+
+#     with YoutubeDL(ydl_opts) as ydl:
+#         ydl.download([link])
 
 
-    #system(f'{base_cmd} ')
+# def _test_bin_download_video(title, link):
+#     print(getcwd())
+#     base_cmd = 'lib\yt-dlp.exe -f "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"'
+#     output_template = f'./output/{title}.%(ext)s'
 
-    system(f'{base_cmd} -o "{output_template}" {link}')
+
+#     #system(f'{base_cmd} ')
+
+#     system(f'{base_cmd} -o "{output_template}" {link}')
+
+
+# test download title function
+# save output to file 
+def test_download_title():
+    with open("test_download_title_output.txt", "w") as file:
+        title, links = download_playlist_titles("https://www.youtube.com/playlist?list=PLqj_PfKdlkzdEfBQPW1dnnGc_whfcbxO0")
+        file.write(f"playlist title: {title}\n")
+        for link in links:
+            file.write(link + "\n")
+
+test_download_title()
