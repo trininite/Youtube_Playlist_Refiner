@@ -11,7 +11,8 @@ with open("./src/duplicate_check/logs_2025-04-21_17-54-11.txt", mode="w", encodi
 def clean_title(dirty_title:str):
     dirty_title= dirty_title.lower()
     dirty_title= re.sub(r'\(.*?\)|\[.*?]|official|video|lyrics|audio|hd|4k', '', dirty_title)
-    dirty_title= re.sub(r'[^a-z0-9\s]', '', dirty_title)
+    dirty_title = re.sub(r'[^\w\s]', '', dirty_title, flags=re.UNICODE)
+    dirty_title = re.sub(r'_', ' ', dirty_title)
     clean_title= re.sub(r'\s+', ' ', dirty_title).strip()
     return clean_title
 
