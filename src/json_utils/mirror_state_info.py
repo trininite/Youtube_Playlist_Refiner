@@ -5,8 +5,6 @@ from os import path, getcwd, geteuid
 def mirror_info_json_generator(title :str, url :str, mirror_path :str, video_count :int) -> str:
     json_file_path = path.join(mirror_path, "mirror_info.json")
     
-    print(json_file_path)
-
     if not path.exists(json_file_path):
         mirror_creation_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -18,7 +16,6 @@ def mirror_info_json_generator(title :str, url :str, mirror_path :str, video_cou
             "mirror_last_updated": mirror_creation_time
         }
 
-    print(mirror_info)
     # case for updating the info json file
     """elif path.exists(mirror_path):
         

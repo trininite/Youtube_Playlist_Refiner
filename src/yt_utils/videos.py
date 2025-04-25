@@ -2,25 +2,36 @@
 
 from .common import get_ydl
 
-# download info needed for creating mirror state JSON
-def download_basic_video_info(video_url :str) -> dict:
+
+def download_playlist_videos_info(playlist_url: str) -> list:
+    """
+    Downloads information for every video in a YouTube playlist.
+
+    Parameters:
+        playlist_url (str): The URL of the YouTube playlist.
+
+    Returns:
+        list: A list of dictionaries, each containing a video's title, URL,
+              and the uploader's name.
+    """
 
     ydl_opts = {
         'quiet': True,
         'extract_flat': True,
-        'dump_single_json': True,
-        'simulate': True
+        'force_generic_extractor': False,
     }
 
-    with load_ydl(ydl_opts) as ydl:
-        video_info = ydl.extract_info(video_url, download=False)
-        video_title = video_info['title']
-        video_url = video_info['webpage_url']
-        channel_name = video_info['uploader']
-        channel_link = video_info['uploader_url']
-        return {
-            'title': video_title,
-            'url': video_url,
-            'channel_name': channel_name,
-            'channel_link': channel_link
-        }
+    videos_info = []
+    with get_ydl(ydl_opts) as ydl:
+        info = ydl.extract_info(playlist_url, download=False)
+
+        if 'entries' in info:
+            for entry in info['entries']:
+                video_data = {
+                    "title": entry.get("title"),
+                    "url": f"https://www.youtube.com/watch?v={entry.get('id')}",
+                    "channel": entry.get("uploader")
+                }
+                videos_info.append(video_data)
+
+    return videos_info

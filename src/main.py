@@ -15,7 +15,8 @@ def main() -> None:
     start_point :int = startup_dialogue()
 
     match start_point:
-        # mirror creation
+        # mirror creation, just creates the folder and mirror_info.json. 
+        # also creates the INITIAL song list, doesn't look for duplicates
         case 1:
             create_mirror()
 
