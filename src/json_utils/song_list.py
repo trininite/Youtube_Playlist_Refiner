@@ -21,5 +21,5 @@ def generate_song_list(video_info_list :list, mirror_path :str) -> str:
 
 
 def read_song_list(mirror_path :str) -> list:
-    if not path.exists(path.join(mirror_path, "CURRENT.json")):
-        song_list = path.
+    if not path.exists(path.join(mirror_path, "song_list/CURRENT.json")):
+        song_list = path.join(mirror_path, "song_list/INITIAL.json")
