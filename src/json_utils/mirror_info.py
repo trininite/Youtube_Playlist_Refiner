@@ -1,0 +1,22 @@
+import json
+from datetime import datetime
+from os import path
+
+def mirror_info_json_generator(playlist_info :dict, mirror_path :str, action_time :str) -> str:
+    json_file_path = path.join(mirror_path, "mirror_info.json")
+    
+    if not path.exists(json_file_path):
+
+        mirror_info = {
+            "title": playlist_info["title"],
+            "url": playlist_info["url"],
+            "video_count": playlist_info["video_count"],
+            "mirror_creation_time": action_time,
+            "mirror_last_updated": action_time
+        }
+        
+        with open(json_file_path, 'w') as f:
+            json.dump(mirror_info, f, indent=4)
+
+    return json_file_path
+    

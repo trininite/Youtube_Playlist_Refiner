@@ -1,7 +1,4 @@
-# utils for downloading entire playlists and playlist info
-
 from .common import get_ydl
-
 
 def download_playlist_info(playlist_url :str) -> dict:
     """
@@ -24,6 +21,7 @@ def download_playlist_info(playlist_url :str) -> dict:
             video_count = len(playlist_info.get('entries', []))
             playlist_info :dict = {
                 'title': playlist_title,
+                'url': playlist_url,
                 'video_count': video_count
             }
     except Exception as e:

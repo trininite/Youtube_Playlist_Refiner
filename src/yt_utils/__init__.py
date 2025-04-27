@@ -1,6 +1,6 @@
 # yt_utils
 
-from .playlists import download_playlist_info
+from .playlist_info import download_playlist_info
 
-from .videos import download_playlist_videos_info
+from .playlist_videos_info import download_playlist_videos_info
 
