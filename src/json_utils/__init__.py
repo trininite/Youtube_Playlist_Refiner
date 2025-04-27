@@ -1,5 +1,5 @@
 # json_utils
 
-from .mirror_info import mirror_info_json_generator
+from .mirror_info import generate_mirror_info
 
-from .song_list import song_list_json_generator
+from .song_list import generate_song_list

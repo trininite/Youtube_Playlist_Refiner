@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 from os import path
 
-def mirror_info_json_generator(playlist_info :dict, mirror_path :str, action_time :str) -> str:
+def generate_mirror_info(playlist_info :dict, mirror_path :str, action_time :str) -> str:
     json_file_path = path.join(mirror_path, "mirror_info.json")
     
     if not path.exists(json_file_path):

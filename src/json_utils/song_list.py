@@ -1,8 +1,8 @@
 import json
-from os import path
+from os import path, listdir
 
 
-def song_list_json_generator(video_info_list :list, mirror_path :str) -> str:
+def generate_song_list(video_info_list :list, mirror_path :str) -> str:
     
     json_song_list = []
 
@@ -18,3 +18,8 @@ def song_list_json_generator(video_info_list :list, mirror_path :str) -> str:
     if not path.exists(json_file_path):
         with open(json_file_path, "w") as f:
             json.dump(json_song_list, f, indent=4, ensure_ascii=False)
+
+
+def read_song_list(mirror_path :str) -> list:
+    if not path.exists(path.join(mirror_path, "CURRENT.json")):
+        song_list = path.
