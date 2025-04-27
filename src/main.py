@@ -1,9 +1,7 @@
 #!usr/bin/env python3
 
 # standard
-import datetime
-from os import mkdir, chdir, path
-#import json
+from datetime import datetime
 
 # custom
 from dialogues import startup_dialogue
@@ -18,6 +16,7 @@ def main() -> None:
         # mirror creation, just creates the folder and mirror_info.json. 
         # also creates the INITIAL song list, doesn't look for duplicates
         case 1:
+            action_time :str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             create_mirror()
 
         # mirror update
