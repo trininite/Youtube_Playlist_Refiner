@@ -1,8 +1,8 @@
 import json
-from os import path, listdir
+from os import path, rename
 
 
-def generate_song_list(video_info_list :list, mirror_path :str) -> str:
+def generate_song_list(video_info_list :list, mirror_path :str, action_time :str) -> str:
     
     json_song_list = []
 
@@ -18,9 +18,19 @@ def generate_song_list(video_info_list :list, mirror_path :str) -> str:
     if not path.exists(json_file_path):
         with open(json_file_path, "w") as f:
             json.dump(json_song_list, f, indent=4, ensure_ascii=False)
+    
+    else:
+        json_file_path = path.join(mirror_path, "CURRENT.json")
+        if path.exists(json_file_path):
+            rename(json_file_path, path.join(mirror_path, f"{action_time}.json"))
+
+        with open(json_file_path, "w") as f:
+            json.dump(json_song_list, f, indent=4, ensure_ascii=False)
+
+    
 
 
-def read_song_list(mirror_path :str) -> list:
+def read_song_list(mirror_path :str) -> list[dict]:
     if not path.exists(path.join(mirror_path, "song_list/CURRENT.json")):
         song_list = path.join(mirror_path, "song_list/INITIAL.json")
     else:
