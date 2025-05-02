@@ -28,9 +28,10 @@ def main() -> None:
             mirror_operation, mirror_path = mirror_update_dialogue()
         
             match mirror_operation:
+                # duplicate check
                 case 1:
-                    song_list = read_song_list(mirror_path)
-                    updated_song_list = run_duplicate_check(mirror_path)
+                    song_list :list[dict] = read_song_list(mirror_path)
+                    updated_song_list = run_duplicate_check(song_list)
                     generate_song_list(updated_song_list, mirror_path)
                 case 2:
                     pass
