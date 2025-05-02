@@ -9,6 +9,7 @@ from dialogues import mirror_update_dialogue
 
 from mirror_utils import create_mirror
 from mirror_utils import run_duplicate_check
+from mirror_utils import run_name_updater
 
 from json_utils import read_song_list
 from json_utils import generate_song_list
@@ -35,17 +36,24 @@ def main() -> None:
                     song_list :list[dict] = read_song_list(mirror_path)
                     updated_song_list = run_duplicate_check(song_list)
                     generate_song_list(updated_song_list, mirror_path)
+                
                 # dead link check
                 case 2:
                     song_list :list[dict] = read_song_list(mirror_path)
                     updated_song_list :list[dict] = run_dead_link_check(song_list)
                     generate_song_list(updated_song_list, mirror_path)
-                    
+
+                # name updater    
                 case 3:
-                    pass
+                    song_list :list[dict] = read_song_list(mirror_path)
+                    updated_song_list :list[dict] = run_name_updater(song_list, mirror_path)
+                    generate_song_list(updated_song_list, mirror_path)
             
 
 
 
 if __name__ == "__main__":
     main()
+
+
+# on this day, gta VI was delayed

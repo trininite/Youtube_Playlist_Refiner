@@ -2,7 +2,7 @@ import json
 from os import path, rename
 
 
-def generate_song_list(video_info_list :list, mirror_path :str, action_time :str) -> str:
+def generate_song_list(video_info_list :list[dict], mirror_path :str, action_time :str) -> None:
     
     json_song_list = []
 
@@ -11,6 +11,7 @@ def generate_song_list(video_info_list :list, mirror_path :str, action_time :str
         video_info["path"] = None
         video_info["duplicate"] = False
         video_info["resource"] = False
+        video_info["file_name"] = video_info["title"]
         json_song_list.append(video_info)
 
     json_file_path = path.join(mirror_path, "INITIAL.json")
@@ -26,8 +27,6 @@ def generate_song_list(video_info_list :list, mirror_path :str, action_time :str
 
         with open(json_file_path, "w") as f:
             json.dump(json_song_list, f, indent=4, ensure_ascii=False)
-
-    
 
 
 def read_song_list(mirror_path :str) -> list[dict]:
