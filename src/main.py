@@ -13,6 +13,8 @@ from mirror_utils import run_duplicate_check
 from json_utils import read_song_list
 from json_utils import generate_song_list
 
+from yt_utils import run_dead_link_check
+
 def main() -> None:
     action_time :str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     start_point :int = startup_dialogue()
@@ -33,8 +35,12 @@ def main() -> None:
                     song_list :list[dict] = read_song_list(mirror_path)
                     updated_song_list = run_duplicate_check(song_list)
                     generate_song_list(updated_song_list, mirror_path)
+                # dead link check
                 case 2:
-                    pass
+                    song_list :list[dict] = read_song_list(mirror_path)
+                    updated_song_list :list[dict] = run_dead_link_check(song_list)
+                    generate_song_list(updated_song_list, mirror_path)
+                    
                 case 3:
                     pass
             
