@@ -11,7 +11,7 @@ def generate_song_list(video_info_list :list[dict], mirror_path :str, action_tim
         video_info["path"] = None
         video_info["duplicate"] = False
         video_info["resource"] = False
-        video_info["file_name"] = video_info["title"]
+        video_info["file_name"] = f"{video_info["title"]}.mp3"
         json_song_list.append(video_info)
 
     json_file_path = path.join(mirror_path, "INITIAL.json")
