@@ -1,41 +1,80 @@
 import json
 from os import path, rename
 
+from yt_utils import download_playlist_videos_info
 
-def generate_song_list(video_info_list :list[dict], mirror_path :str, action_time :str) -> None:
-    
-    json_song_list = []
+class SongList:
+    # json_file_path = path to the most recent song_list
+    # song_info_list = list of song info read from json_file_path
 
-    # add extra fields
-    for video_info in video_info_list:
-        video_info["path"] = None
-        video_info["duplicate"] = False
-        video_info["resource"] = False
-        video_info["file_name"] = f"{video_info["title"]}.mp3"
-        json_song_list.append(video_info)
+    def __init__(self, mirror_path :str, action_time :str) -> None:
+        self.mirror_path = mirror_path
+        self.action_time = action_time
 
-    json_file_path = path.join(mirror_path, "INITIAL.json")
+    def create_list(self, song_info_list :list[dict]) -> None:
+        self.json_file_path = path.join(self.mirror_path, "song_list/INITIAL.json")
 
-    if not path.exists(json_file_path):
-        with open(json_file_path, "w") as f:
-            json.dump(json_song_list, f, indent=4, ensure_ascii=False)
-    
-    else:
-        json_file_path = path.join(mirror_path, "CURRENT.json")
-        if path.exists(json_file_path):
-            rename(json_file_path, path.join(mirror_path, f"{action_time}.json"))
-
-        with open(json_file_path, "w") as f:
-            json.dump(json_song_list, f, indent=4, ensure_ascii=False)
+        if path.exists(self.json_file_path):
+            raise Exception("Use of initial song list creation method when INITIAL.json already exists")
 
 
-def read_song_list(mirror_path :str) -> list[dict]:
-    if not path.exists(path.join(mirror_path, "song_list/CURRENT.json")):
-        song_list = path.join(mirror_path, "song_list/INITIAL.json")
-    else:
-        song_list = path.join(mirror_path, "song_list/CURRENT.json")
+        self.song_info_list = []
 
-    with open(song_list, "r") as f:
-        song_list = json.load(f)
+        # add extra fields
+        for song_info in song_info_list:
+            song_info["duplicate"] = False
+            song_info["resource"] = False
+            song_info["file_name"] = f"{song_info['title']}.mp3"
+            self.song_info_list.append(song_info)
+        
 
-    return song_list
+
+
+    def read_list(self) -> None:
+        self.json_file_path = path.join(self.mirror_path, "song_list/CURRENT.json")
+        if not path.exists(self.json_file_path):
+            self.json_file_path = path.join(self.mirror_path, "song_list/INITIAL.json")
+        if not path.exists(self.json_file_path):
+            raise Exception("No song_list found")
+
+        with open(self.json_file_path, "r") as f:
+            self.song_info_list = json.load(f)
+
+        
+
+    def update_list(self) -> None:
+        current_song_info_list = self.read_list()
+
+        updated_song_info_list = download_playlist_videos_info(self.mirror_path)
+
+        merged_song_info_list :list[dict] = []
+        to_append_list :list[dict] = []
+
+        matched_songs = set()
+
+        for new_song in updated_song_info_list:
+            new_song_id = new_song["url"].split("=")[-1]
+            for current_song in current_song_info_list:
+
+                current_song_id = current_song["url"].split("=")[-1]
+
+                if current_song_id in matched_songs:
+                    continue
+
+                if new_song_id == current_song_id:
+                    merged_song_info_list.append(current_song)
+                    
+                    matched_songs.add(current_song_id)
+        
+        merged_song_info_list.extend(to_append_list)
+        self.song_info_list = merged_song_info_list
+
+    def save_list(self) -> None:
+        self.json_file_path = path.join(self.mirror_path, "song_list/INITIAL.json")
+        if path.exists(self.json_file_path)
+            self.json_file_path = path.join(self.mirror_path, "song_list/CURRENT.json")
+        if path.exists(self.json_file_path):
+            rename(self.json_file_path, path.join(self.mirror_path, f"{self.action_time}.json"))
+
+        with open(self.json_file_path, "w") as f:
+            json.dump(self.song_info_list, f, indent=4, ensure_ascii=False)

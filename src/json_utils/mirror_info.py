@@ -19,4 +19,14 @@ def generate_mirror_info(playlist_info :dict, mirror_path :str, action_time :str
             json.dump(mirror_info, f, indent=4)
 
     return json_file_path
-    
+
+def read_mirror_info(mirror_path :str) -> dict:
+    json_file_path = path.join(mirror_path, "mirror_info.json")
+
+    if not path.exists(json_file_path):
+        raise Exception("No mirror_info.json found")
+
+    with open(json_file_path, 'r') as f:
+        mirror_info = json.load(f)
+
+    return mirror_info
