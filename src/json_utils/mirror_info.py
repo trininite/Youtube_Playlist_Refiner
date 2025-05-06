@@ -4,30 +4,51 @@ from os import path
 
 from .info_file import InfoFile
 
+from yt_utils import download_playlist_info
+
 class MirrorInfo(InfoFile):
     def __init__(self, mirror_path :str, action_time :str) -> None:
         super().__init__(mirror_path, action_time)
 
-    def generate_mirror_info(playlist_info :dict, mirror_path :str, action_time :str) -> str:
-        json_file_path = path.join(mirror_path, "mirror_info.json")
+        self.json_file_path = path.join(self.mirror_path, "mirror_info.json")
 
-        if not path.exists(json_file_path):
+    def __eq__(self):
+        return self.mirror_info_dict
+
+    def generate_mirror_info(self, playlist_info :dict) -> str:
+
+        if not path.exists(self.json_file_path):
 
             mirror_info = {
                 "title": playlist_info["title"],
                 "url": playlist_info["url"],
                 "video_count": playlist_info["video_count"],
-                "mirror_creation_time": action_time,
-                "mirror_last_updated": action_time
+                "mirror_creation_time": self.action_time,
+                "mirror_last_updated": self.action_time
             }
 
-            with open(json_file_path, 'w') as f:
+            with open(self.json_file_path, 'w') as f:
                 json.dump(mirror_info, f, indent=4)
+            
+            self.mirror_info_dict = mirror_info
+        
+        else:
+            raise Exception("mirror_info.json already exists")
 
-        return json_file_path
+    def update_mirror_info(self):
+        self.read_mirror_info
 
-    def read_mirror_info(mirror_path :str) -> dict:
-        json_file_path = path.join(mirror_path, "mirror_info.json")
+        new_playlist_info = download_playlist_info(self.mirror_info_dict["url"])
+
+        self.mirror_info_dict["video_count"] = new_playlist_info["video_count"]
+        self.mirror_info_dict["mirror_last_updated"] = self.action_time
+
+        with open(self.json_file_path, 'w') as f:
+            json.dump(self.mirror_info_dict, f, indent=4)
+
+
+    def read_mirror_info(self) -> dict:
+        json_file_path = path.join(self.mirror_path, "mirror_info.json")
 
         if not path.exists(json_file_path):
             raise Exception("No mirror_info.json found")
@@ -35,4 +56,4 @@ class MirrorInfo(InfoFile):
         with open(json_file_path, 'r') as f:
             mirror_info = json.load(f)
 
-        return mirror_info
+        self.mirror_info_dict = mirror_info
