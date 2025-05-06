@@ -30,7 +30,10 @@ def download_playlist_videos_info(playlist_url: str) -> list:
                 video_data = {
                     "title": entry.get("title"),
                     "url": f"https://www.youtube.com/watch?v={entry.get('id')}",
-                    "channel": entry.get("uploader")
+                    "channel": entry.get("uploader"),
+                    "path": None,
+                    "duplicate": False,
+                    "resource": False
                 }
                 videos_info.append(video_data)
 

@@ -2,7 +2,7 @@ import os
 #import shutil
 #import sys
 
-from json_utils import generate_mirror_info
+from json_utils import MirrorInfo
 from json_utils import SongList
 
 from yt_utils import download_playlist_info
@@ -42,7 +42,8 @@ def create_mirror(action_time :str) -> str:
         print("Error creating mirror folder. A folder with the same name may already exist.")
 
     # create mirror_info.json
-    generate_mirror_info(playlist_info, mirror_path, action_time)
+    mirror_info = MirrorInfo(mirror_path, action_time)
+    mirror_info.generate_mirror_info(playlist_info)
 
     # create the song history folder
     # contains all the downloaded songs in dated json files
@@ -61,4 +62,4 @@ def create_mirror(action_time :str) -> str:
 
     create_mirror_cache(mirror_path)
 
-    return mirror_path
+    return mirror_path, mirror_info

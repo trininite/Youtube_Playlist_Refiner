@@ -8,12 +8,16 @@ from dialogues import startup_dialogue
 from dialogues import mirror_update_dialogue
 
 from mirror_utils import create_mirror
+
+#TODO move to SongList class
 from mirror_utils import run_name_updater
 
+from json_utils import MirrorInfo
 from json_utils import SongList
-from json_utils import read_mirror_info
 
 from yt_utils import download_playlist_videos_info
+
+#TODO move to SongList class
 from yt_utils import run_dead_link_check
 
 def main() -> None:
@@ -24,19 +28,23 @@ def main() -> None:
         # also creates the INITIAL song list, doesn't look for duplicates
         
         case 1:
-            create_mirror(action_time)
+            mirror_path = create_mirror(action_time)
+
 
         # mirror update
         case 2:
             mirror_operation, mirror_path = mirror_update_dialogue()
 
-            mirror_info = read_mirror_info(mirror_path)
-            playlist_url = mirror_info["url"]
+            mirror_info = MirrorInfo(mirror_path, action_time)
+            mirror_info.read_mirror_info()
+            playlist_url = mirror_info.mirror_info_dict["url"]
 
             song_list :SongList = SongList(mirror_path, action_time)
             song_list.read_list()
-            song_list.update_list(download_playlist_videos_info(playlist_url))
-            assert len(song_list.song_info_list) > 0
+
+            new_song_info_list :list[dict] = download_playlist_videos_info(playlist_url)
+            song_list.update_list(new_song_info_list)
+            
 
             match mirror_operation:
                 # duplicate check
@@ -56,6 +64,9 @@ def main() -> None:
                     #updated_song_list :list[dict] = run_name_updater(song_list, mirror_path)
                     #generate_song_list(updated_song_list, mirror_path, action_time)
                     ...
+
+            mirror_info.update_mirror_info()
+
 
 
 
