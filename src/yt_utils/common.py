@@ -8,3 +8,5 @@ DEFAULT_OPTIONS = {}
 def get_ydl(options=None):
     return YoutubeDL(options or DEFAULT_OPTIONS)
 
+# otag
+# https://cdn.7tv.app/emote/01GYT25QT8000DVPJKHH13026T/4x.avif

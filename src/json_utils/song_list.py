@@ -3,6 +3,7 @@ from os import path, rename
 import re
 from rapidfuzz import fuzz
 
+from .info_file import InfoFile
 
 AUTO_ACCEPT = 95
 REVIEW_MIN = 80
@@ -15,13 +16,12 @@ def clean_title(dirty_title:str):
     clean_title= re.sub(r'\s+', ' ', dirty_title).strip()
     return clean_title
 
-class SongList:
+class SongList(InfoFile):
     # json_file_path = path to the most recent song_list
     # song_info_list = list of song info read from json_file_path
 
     def __init__(self, mirror_path :str, action_time :str) -> None:
-        self.mirror_path = mirror_path
-        self.action_time = action_time
+        super().__init__(mirror_path, action_time)
 
     def create_list(self, song_info_list :list[dict]) -> None:
         self.json_file_path = path.join(self.mirror_path, "song_list/INITIAL.json")
