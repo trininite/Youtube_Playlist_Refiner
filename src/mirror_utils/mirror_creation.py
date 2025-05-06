@@ -3,7 +3,7 @@ import os
 #import sys
 
 from json_utils import generate_mirror_info
-from json_utils import generate_song_list
+from json_utils import SongList
 
 from yt_utils import download_playlist_info
 from yt_utils import download_playlist_videos_info
@@ -27,6 +27,10 @@ def create_mirror(action_time :str) -> str:
 
     # parent directory of the mirror
     mirror_parent_path :str = input("Enter the !ABSOLUTE! path of where you want the mirror folder: ")
+    if "~" in mirror_parent_path:
+        mirror_parent_path = os.path.expanduser(mirror_parent_path)
+
+    assert os.path.exists(mirror_parent_path)
 
     # actual location of the mirror
     mirror_path :str = os.path.join(mirror_parent_path, playlist_info["title"])
@@ -45,16 +49,15 @@ def create_mirror(action_time :str) -> str:
     # first list will be named INITIAL
     # current list will be named CURRENT
     # all previous lists, excluding the first, will be named YYYY-MM-DD_HH-MM-SS
-    song_list_history_path :str = os.path.join(mirror_path, "song_list")
-    try:
-        os.makedirs(song_list_history_path, exist_ok=False)
-    except OSError as e:
-        print(e)
-        print("Error creating song list history folder. A folder with the same name may already exist.")
+    song_list_dir_path :str = os.path.join(mirror_path, "song_list")
 
-    video_info_list = download_playlist_videos_info(playlist_info["url"])
+    os.makedirs(song_list_dir_path, exist_ok=True)
 
-    generate_song_list(video_info_list, song_list_history_path)
+    song_info_list = download_playlist_videos_info(playlist_info["url"])
+
+    song_list = SongList(mirror_path, action_time)
+    song_list.create_list(song_info_list)
+    song_list.save_list()
 
     create_mirror_cache(mirror_path)
 

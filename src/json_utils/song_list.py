@@ -1,41 +1,157 @@
 import json
 from os import path, rename
+import re
+from rapidfuzz import fuzz
 
 
-def generate_song_list(video_info_list :list[dict], mirror_path :str, action_time :str) -> None:
-    
-    json_song_list = []
+AUTO_ACCEPT = 95
+REVIEW_MIN = 80
 
-    # add extra fields
-    for video_info in video_info_list:
-        video_info["path"] = None
-        video_info["duplicate"] = False
-        video_info["resource"] = False
-        video_info["file_name"] = f"{video_info["title"]}.mp3"
-        json_song_list.append(video_info)
+def clean_title(dirty_title:str):
+    dirty_title= dirty_title.lower()
+    dirty_title= re.sub(r'\(.*?\)|\[.*?]|official|video|lyrics|audio|hd|4k', '', dirty_title)
+    dirty_title = re.sub(r'[^\w\s]', '', dirty_title, flags=re.UNICODE)
+    dirty_title = re.sub(r'_', ' ', dirty_title)
+    clean_title= re.sub(r'\s+', ' ', dirty_title).strip()
+    return clean_title
 
-    json_file_path = path.join(mirror_path, "INITIAL.json")
+class SongList:
+    # json_file_path = path to the most recent song_list
+    # song_info_list = list of song info read from json_file_path
 
-    if not path.exists(json_file_path):
-        with open(json_file_path, "w") as f:
-            json.dump(json_song_list, f, indent=4, ensure_ascii=False)
-    
-    else:
-        json_file_path = path.join(mirror_path, "CURRENT.json")
-        if path.exists(json_file_path):
-            rename(json_file_path, path.join(mirror_path, f"{action_time}.json"))
+    def __init__(self, mirror_path :str, action_time :str) -> None:
+        self.mirror_path = mirror_path
+        self.action_time = action_time
 
-        with open(json_file_path, "w") as f:
-            json.dump(json_song_list, f, indent=4, ensure_ascii=False)
+    def create_list(self, song_info_list :list[dict]) -> None:
+        self.json_file_path = path.join(self.mirror_path, "song_list/INITIAL.json")
+
+        if path.exists(self.json_file_path):
+            raise Exception("Use of initial song list creation method when INITIAL.json already exists")
 
 
-def read_song_list(mirror_path :str) -> list[dict]:
-    if not path.exists(path.join(mirror_path, "song_list/CURRENT.json")):
-        song_list = path.join(mirror_path, "song_list/INITIAL.json")
-    else:
-        song_list = path.join(mirror_path, "song_list/CURRENT.json")
+        self.song_info_list = []
 
-    with open(song_list, "r") as f:
-        song_list = json.load(f)
+        # add extra fields
+        for song_info in song_info_list:
+            song_info["duplicate"] = False
+            song_info["resource"] = False
+            song_info["file_name"] = f"{song_info['title']}.mp3"
+            self.song_info_list.append(song_info)
 
-    return song_list
+
+
+    def read_list(self) -> None:
+        self.json_file_path = path.join(self.mirror_path, "song_list/CURRENT.json")
+        if not path.exists(self.json_file_path):
+            self.json_file_path = path.join(self.mirror_path, "song_list/INITIAL.json")
+        if not path.exists(self.json_file_path):
+            raise Exception("No song_list found")
+
+        with open(self.json_file_path, "r") as f:
+            self.song_info_list = json.load(f)
+        assert len(self.song_info_list) > 0, "song_info_list is empty"
+
+
+        
+    #TODO test adding new song to the playlist then
+    def update_list(self, new_song_info_list :list[dict]) -> None:
+        current_song_info_list = self.song_info_list
+
+
+        updated_song_info_list :list[dict] = []
+        to_append_list :list[dict] = []
+
+        matched_songs = set()
+
+        for new_song in new_song_info_list:
+            new_song_url :str = new_song["url"]
+            new_song_id = new_song_url.split("=")[-1]
+            del new_song_url
+
+            for current_song in current_song_info_list:
+                current_song_url :str = current_song["url"]
+                current_song_id = current_song_url.split("=")[-1]
+                del current_song_url
+
+                if current_song_id in matched_songs:
+                    continue
+
+                if new_song_id == current_song_id:
+                    updated_song_info_list.append(current_song)
+                    
+                    matched_songs.add(current_song_id)
+        
+        updated_song_info_list.extend(to_append_list)
+        self.song_info_list = updated_song_info_list
+
+    def save_list(self) -> None:
+        self.json_file_path = path.join(self.mirror_path, "song_list/INITIAL.json")
+        if path.exists(self.json_file_path):
+            self.json_file_path = path.join(self.mirror_path, "song_list/CURRENT.json")
+        if path.exists(self.json_file_path):
+            rename(self.json_file_path, path.join(self.mirror_path, f"{self.action_time}.json"))
+
+        with open(self.json_file_path, "w") as f:
+            json.dump(self.song_info_list, f, indent=4, ensure_ascii=False)
+
+
+    def run_duplicate_check(self):
+        processed_indices: set[int] = set()
+
+        for i, video_i in enumerate(self.song_info_list):
+            if i in processed_indices:
+                continue
+
+            duplicates = []
+            duplicate_indices = []
+
+            video_i_title = clean_title(video_i["title"])
+
+            for j, video_j in enumerate(self.song_info_list):
+                if i == j or j in processed_indices:
+                    continue
+
+                video_j_title = clean_title(video_j["title"])
+                ratio = fuzz.ratio(video_i_title, video_j_title)
+
+                if ratio < REVIEW_MIN:
+                    continue
+
+                if ratio < AUTO_ACCEPT:
+                    print(f"\nPossible duplicate:\n  {video_i_title}\n  {video_j_title}\n  Similarity: {ratio}%\n")
+                    if input("Is this a duplicate? (y/n): ").strip().lower() != "y":
+                        continue
+
+                # found a duplicate
+                if not duplicates:
+                    duplicates.append(video_i["title"])
+                    duplicate_indices.append(i)
+
+                duplicates.append(video_j["title"])
+                duplicate_indices.append(j)
+
+            if duplicates:
+                print("\nSelect the number of the title you want to KEEP:")
+                for idx, title in enumerate(duplicates):
+                    print(f"{idx}: {title}")
+                while True:
+                    try:
+                        picked = int(input("> ").strip())
+                        if 0 <= picked < len(duplicates):
+                            break
+                        else:
+                            print("Invalid number. Try again.")
+                    except ValueError:
+                        print("Invalid input. Enter a number.")
+
+                for idx, song_idx in enumerate(duplicate_indices):
+                    if idx == picked:
+                        continue
+                    self.song_info_list[song_idx]["duplicate"] = True
+                    processed_indices.add(song_idx)
+
+            else:
+                processed_indices.add(i)
+
+
