@@ -16,6 +16,7 @@ from json_utils import MirrorInfo
 from json_utils import SongList
 
 from yt_utils import download_playlist_videos_info
+from yt_utils import download_playlist_songs
 
 #TODO move to SongList class
 from yt_utils import run_dead_link_check
@@ -65,6 +66,11 @@ def main() -> None:
                     #generate_song_list(updated_song_list, mirror_path, action_time)
                     ...
 
+                # download playlist
+                case 4:
+                    song_list = download_playlist_songs(mirror_path, song_list)
+                    song_list.save_list()
+
             mirror_info.update_mirror_info()
 
 
@@ -74,4 +80,4 @@ if __name__ == "__main__":
     main()
 
 
-# on this day, gta VI was delayed
+# on this day, gta VI was delayed"""

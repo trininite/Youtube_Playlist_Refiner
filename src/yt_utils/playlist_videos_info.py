@@ -31,7 +31,7 @@ def download_playlist_videos_info(playlist_url: str) -> list:
                     "title": entry.get("title"),
                     "url": f"https://www.youtube.com/watch?v={entry.get('id')}",
                     "channel": entry.get("uploader"),
-                    "path": None,
+                    "file_name": entry.get("title")+".mp3",
                     "duplicate": False,
                     "resource": False
                 }

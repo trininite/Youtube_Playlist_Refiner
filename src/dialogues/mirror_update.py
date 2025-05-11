@@ -20,11 +20,12 @@ def mirror_update_dialogue() -> tuple[int, str]:
         print("\
             [1] Identify duplicates\n\
             [2] Identify dead links\n\
-            [3] Download playlist\n")
+            [3] Run Name Updater\n\
+            [4] Download playlist\n")
         
         mirror_operation :int = int(input("Enter the number of the operation you want to perform: "))
 
-        if mirror_operation > 3 or mirror_operation < 1:
+        if mirror_operation > 4 or mirror_operation < 1:
             print("Invalid input, please try again.")
         else:
             break
