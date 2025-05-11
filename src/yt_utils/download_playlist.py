@@ -6,25 +6,6 @@ from os import path, rename
 
 
 
-def download_playlist_songs(playlist_url: str, mirror_path: str, song_list) -> None:
-    songs_folder = path.join(mirror_path, "songs")
-
-    ydl_opts = {
-        'quiet': True,
-        'outtmpl': path.join(songs_folder, '%(id)s.%(ext)s'),
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
-    }],
-    }
-
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([playlist_url])
-
-    for song in song_list.song_info_list:
-        rename(path.join(songs_folder, f"{song['id']}.mp4"), path.join(songs_folder, song['file_name']))
-
 def download_playlist_songs(mirror_path: str, song_list) -> None:
     songs_folder = path.join(mirror_path, "songs")
 
