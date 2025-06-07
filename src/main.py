@@ -9,8 +9,8 @@ from dialogues import mirror_update_dialogue
 
 from mirror_utils import create_mirror
 
-#TODO move to SongList class
 from mirror_utils import run_name_updater
+from mirror_utils import cache_check
 
 from json_utils import MirrorInfo
 from json_utils import SongList
@@ -18,7 +18,6 @@ from json_utils import SongList
 from yt_utils import download_playlist_videos_info
 from yt_utils import download_playlist_songs
 
-#TODO move to SongList class
 from yt_utils import run_dead_link_check
 
 def main() -> None:
@@ -34,6 +33,9 @@ def main() -> None:
 
         # mirror update
         case 2:
+            print("Running Cache Check...")
+            cache_check()
+
             mirror_operation, mirror_path = mirror_update_dialogue()
 
             mirror_info = MirrorInfo(mirror_path, action_time)
