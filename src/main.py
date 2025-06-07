@@ -51,26 +51,22 @@ def main() -> None:
                 # duplicate check
                 case 1:
                     song_list.run_duplicate_check()
-                    song_list.save_list()
                 
                 # dead link check
                 case 2:
-                    #song_list :list[dict] = read_song_list(mirror_path)
-                    #updated_song_list :list[dict] = run_dead_link_check(song_list)
-                    #generate_song_list(updated_song_list, mirror_path, action_time)
-                    ...
+                    new_song_info_list = run_dead_link_check(song_list.song_info_list)
+                    song_list.update_list(new_song_info_list)
+                    
                 # name updater    
                 case 3:
-                    #song_list :list[dict] = read_song_list(mirror_path)
-                    #updated_song_list :list[dict] = run_name_updater(song_list, mirror_path)
-                    #generate_song_list(updated_song_list, mirror_path, action_time)
-                    ...
+                    new_song_info_list = run_name_updater(song_list.song_info_list)
+                    song_list.update_list(new_song_info_list)
 
                 # download playlist
                 case 4:
                     song_list = download_playlist_songs(mirror_path, song_list)
-                    song_list.save_list()
 
+            song_list.save_list()
             mirror_info.update_mirror_info()
 
 

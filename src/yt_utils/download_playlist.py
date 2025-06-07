@@ -2,11 +2,12 @@ import yt_dlp
 
 from os import path, rename
 
+from json_utils import SongList
 
 
 
 
-def download_playlist_songs(mirror_path: str, song_list) -> None:
+def download_playlist_songs(mirror_path: str, song_list :SongList) -> None:
     songs_folder = path.join(mirror_path, "songs")
 
     ydl_opts = {
