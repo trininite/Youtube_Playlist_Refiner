@@ -11,7 +11,7 @@ from yt_utils import download_playlist_videos_info
 from .mirror_cache import create_mirror_cache
 
 
-def create_mirror(action_time :str) -> str:
+def create_mirror(action_time :str) -> tuple[str,MirrorInfo]:
     """
     Creates a directory at mirror_path/title.
 
@@ -19,9 +19,24 @@ def create_mirror(action_time :str) -> str:
         None    
     
     Returns:
-        str: Full path to the created directory.
+        str: Full path to the created directory and MirrorInfo object
     """
-    playlist_url :str = input("Enter the !FULL! URL of the playlist you want to mirror: ")
+
+    playlist_url :str = ""
+
+    while not playlist_url:
+        try:
+            playlist_url :str = input("Enter the !FULL! URL of the playlist you want to mirror: ")
+        except KeyboardInterrupt:
+            print("\nRetry?")
+            match input("[Y/n]: ").lower():
+                case "y":
+                    continue
+                case _:
+                    quit()
+
+
+
     playlist_info :dict = download_playlist_info(playlist_url)
     del playlist_url
 
