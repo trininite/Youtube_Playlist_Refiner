@@ -61,7 +61,7 @@ def main() -> None:
                     
                 # name updater    
                 case 3:
-                    new_song_info_list = run_name_updater(song_list.song_info_list)
+                    new_song_info_list = run_name_updater(song_list.song_info_list, mirror_path)
                     song_list.update_list(new_song_info_list)
 
                 # download playlist
