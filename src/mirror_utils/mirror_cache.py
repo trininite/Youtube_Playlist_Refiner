@@ -3,7 +3,8 @@ import os
 
 def create_mirror_cache(mirror_path :str) -> None:
     ytpr_cache_dir :str = os.path.join(os.path.expanduser("~/.cache/"), "yt_playlist_refiner")
-    os.makedirs(ytpr_cache_dir, exist_ok=True)
+    if not os.path.exists(ytpr_cache_dir):
+        os.makedirs(ytpr_cache_dir, exist_ok=True)
 
 
     if not os.path.exists(os.path.join(ytpr_cache_dir, "mirror_paths.txt")):
@@ -12,31 +13,49 @@ def create_mirror_cache(mirror_path :str) -> None:
     else:
        with open(os.path.join(ytpr_cache_dir, "mirror_paths.txt"), "a") as f:
            f.write(mirror_path + "\n")
+           
 
 def cache_check():
-    ytpr_cache_dir :str = os.path.join(os.path.expanduser("~/.cache/"), "yt_playlist_refiner")
+    ytpr_cache_dir = os.path.join(os.path.expanduser("~/.cache"), "yt_playlist_refiner")
+    cache_file = os.path.join(ytpr_cache_dir, "mirror_paths.txt")
 
-    new_cache_list :list[str] = []
-    removed_cache_list :list[str] = []
+    working_cache_list = []
+    removed_cache_list = []
+    seen = set()
 
-    with open(os.path.join(ytpr_cache_dir, "mirror_paths.txt"), "r") as f:
-        mirror_paths = f.readlines()
-    
-    for mirror_path in mirror_paths:
-        if os.path.exists(mirror_path.strip("\n")):
-            new_cache_list.append(mirror_path)
-            continue
-    
-        removed_cache_list.append(mirror_path)
+    # read and clean each path from file
+    try:
+        with open(cache_file, "r") as f:
+            raw_paths = f.readlines()
+    except FileNotFoundError:
+        print("cache file not found.")
+        return
 
-    print("caches removed:")
-    for removed_cache in removed_cache_list:
-        print(removed_cache)
+    for raw_path in raw_paths:
+        path = raw_path.strip().rstrip("/")  # remove newline + trailing slash
 
-    os.remove(os.path.join(ytpr_cache_dir, "mirror_paths.txt"))
-    with open(os.path.join(ytpr_cache_dir, "mirror_paths.txt"), "a") as f:
-        for new_cache in new_cache_list:
-            f.write(new_cache)
+        if os.path.exists(path):
+            # resolve and normalize path
+            resolved = os.path.abspath(os.path.normpath(os.path.realpath(path)))
+
+            if resolved not in seen:
+                seen.add(resolved)
+                working_cache_list.append(path)
+            else:
+                removed_cache_list.append(path)
+        else:
+            removed_cache_list.append(path)
+
+    if removed_cache_list:
+        print("caches removed:")
+        for removed in removed_cache_list:
+            print(removed)
+
+        with open(cache_file, "w") as f:
+            for path in working_cache_list:
+                f.write(path + "\n")
+    else:
+        print("no caches removed")
 
 
         
