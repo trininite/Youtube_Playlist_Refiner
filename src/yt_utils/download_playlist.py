@@ -39,21 +39,6 @@ def download_playlist_songs(mirror_path: str, song_list :'SongList') -> None:
                 song_list.song_info_list[i]["resource"] = True
                 failed_songs.append(song)
 
-        while 1:
-            try:
-                rename(
-                    path.join(songs_folder, f"{song['url'].split("=")[-1]}.mp3"),
-                    path.join(songs_folder, song['file_name'])
-                )
-            except:
-
-                    print(f"failed to rename {song['title']}")
-                    new_file_name = input("Enter new file name: ")
-
-                    song_list.song_info_list[i]["file_name"] = new_file_name
-            break
-
-
 
     if len(failed_songs) > 0:
         print(f"Failed to download {len(failed_songs)} songs, resource flag set to true")

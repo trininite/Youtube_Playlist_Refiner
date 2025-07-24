@@ -30,14 +30,8 @@ class SongList(InfoFile):
             raise Exception("Use of initial song list creation method when INITIAL.json already exists")
 
 
-        self.song_info_list = []
+        self.song_info_list = song_info_list
 
-        # add extra fields
-        for song_info in song_info_list:
-            song_info["duplicate"] = False
-            song_info["resource"] = False
-            song_info["file_name"] = f"{song_info['title']}.mp3"
-            self.song_info_list.append(song_info)
 
 
 
