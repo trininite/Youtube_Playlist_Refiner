@@ -27,6 +27,7 @@ def create_mirror(action_time :str) -> tuple[str,MirrorInfo]:
     while not playlist_url:
         try:
             playlist_url :str = input("Enter the !FULL! URL of the playlist you want to mirror: ")
+            assert "playlist" in playlist_url
         except KeyboardInterrupt:
             print("\nRetry?")
             match input("[Y/n]: ").lower():
@@ -34,6 +35,8 @@ def create_mirror(action_time :str) -> tuple[str,MirrorInfo]:
                     continue
                 case _:
                     quit()
+        except AssertionError:
+            print("Non-Playlist Link Entered")
 
 
 
