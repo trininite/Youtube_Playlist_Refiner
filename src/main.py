@@ -4,8 +4,8 @@
 from datetime import datetime
 
 # custom
-from dialogues import startup_dialogue
-from dialogues import mirror_update_dialogue
+from cli import startup_dialogue
+from cli import mirror_update_dialogue
 
 from mirror_utils import create_mirror
 
