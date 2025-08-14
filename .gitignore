@@ -1,24 +1,12 @@
-/config/dev_config.json
+src/api_secrets/DEV_YTAPI_SECRET.txt
 
 __pycache__/
-*.py[cod]
 
-.vscode/
-
-TODO
-
-*.log
 
 output
-
-/lib/
 
 __pycache__
 *.pyc
 
-venv
 
-/testing/
-
-/src/*/*.txt
 .*
