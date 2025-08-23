@@ -1,5 +1,6 @@
 from os import system as os_system
 from platform import system as platform_system
+from enum import Enum
 
 def clear_terminal():
     sys_OS = platform_system()
@@ -15,7 +16,7 @@ def clear_terminal():
             raise Exception("Invalid System Type")
 
 
-class console_colors:
+class ConsoleColors(Enum):
     """
     Class that contains all the escape codes for colored text in the console. Use a color then use RESET.
     """
