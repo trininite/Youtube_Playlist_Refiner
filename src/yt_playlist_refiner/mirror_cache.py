@@ -32,7 +32,7 @@ class CacheManager:
 
     def __init__(self):
 
-        self.mirror_paths :list[str] = []
+        self.cached_paths :list[str] = []
 
         try:
             assert os.path.exists(self.cache_file_path)
@@ -113,7 +113,7 @@ class CacheManager:
             raw_paths = f.readlines()
         for raw_path in raw_paths:
             cooked_path = resolve_path(raw_path)
-            self.mirror_paths.append(cooked_path)
+            self.cached_paths.append(cooked_path)
 
 
     #TODO combine cache_check and read_cache
@@ -143,9 +143,8 @@ class CacheManager:
         pruned_mirror_paths :list = []
         seen :set = set()
 
-        for path in self.mirror_paths:
-            cooked_path = resolve_path(path)
-            del path
+        for cached_path in self.cached_paths:
+            cooked_path = resolve_path(cached_path)
 
             if not os.path.exists(cooked_path):
                 pruned_mirror_paths.append(cooked_path)
@@ -164,16 +163,17 @@ class CacheManager:
             for pruned in pruned_mirror_paths:
                 print(pruned)
 
-        self.mirror_paths :list[str] = verified_mirror_paths
+        self.cached_paths :list[str] = verified_mirror_paths
     
 
     def _update_cache(self):
         with open(self.cache_file_path, "w", encoding="UTF+8") as f:
-                for verified in self.mirror_paths:
+                f.truncate(0)
+                for verified in self.cached_paths:
                     f.write(verified + "\n")
 
 
-    def add_mirror_path(self, new_mirror_path :str) -> bool:
+    def add_mirror_path(self, new_mirror_path :str) -> None:
         """
         Adds a new mirror path to the cache if it doesn't already exist.
 
@@ -181,31 +181,25 @@ class CacheManager:
             new_mirror_path (str): The path to the new mirror folder.
 
         Returns:
-            bool: True if the path was added successfully, False otherwise.
+            None
         """
 
         cooked_path :str = resolve_path(new_mirror_path)
 
         if not os.path.exists(cooked_path):
-            print(Exception("mirror doesn't exist"))
-            return False
+            raise FileNotFoundError("mirror doesn't exist")
 
-        if cooked_path in self.mirror_paths:
-            print(Exception("path already in cache file"))
-            return False
+        if cooked_path in self.cached_paths:
+            raise FileExistsError("path already in cache file")
 
-        self.mirror_paths.append(new_mirror_path)
-        return True
+        self.cached_paths.append(new_mirror_path)
     
 
     def mirror_path_unique(self, new_mirror_path :str) -> bool:
         cooked_path :str = resolve_path(new_mirror_path)
 
-        if cooked_path in self.mirror_paths:
-            print(Exception("path already in cache file"))
-            return False
-        
-        return True
+        if cooked_path in self.cached_paths:
+            raise Exception("path already in cache file")
 
     
 

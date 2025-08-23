@@ -15,7 +15,7 @@ from mirror_cache import CacheManager
 class MirrorInfo:
     title: str | None = None
     url: str | None = None
-    song_count: int | None = None #NOTE this value isnt very critical, the working song_count will be generated from 
+    song_count: int | None = None #NOTE this value isnt very critical, the working count will be pulled from youtube
     etag: str | None = None
     mirror_creation_time: str | None = None
     mirror_last_updated: str | None = None
@@ -29,36 +29,34 @@ class MirrorInfo:
 
 
 class MirrorController:
-    def __init__(
-        self,
-        mirror_path:str,
-        yt_api:YoutubeAPI,
-        action_time:str,
-        playlist_url:str=None
-        ):
-
+    def __init__(self, **kwargs):
+        mirror_path :str = kwargs["mirror_path"]
+        self.action_time :str = kwargs["action_time"]
+ 
+        self._yt_api :YoutubeAPI = kwargs["yt_api"]
         self.mirror_info = MirrorInfo()
 
         #NOTE a playlist url is only passed when creating a mirror
-        creating :bool = bool(playlist_url)
+        creating :bool = bool(kwargs["playlist_url"])
 
-        # arg vars
         self._mirror_path :Path = Path(mirror_path).expanduser().absolute()
-        self._yt_api = yt_api
 
-        
 
-        if creating:
+        #NOTE a playlist url is only passed when creating a mirror
+        if kwargs["playlist_url"]:
+            playlist_url :str = kwargs["playlist_url"]
             self.mirror_info.url = playlist_url
             self._sync_mirror_info()
-        if not creating:
+        else:
             self._read_mirror_info_file()
 
         try:
             assert self._yt_api._playlist_valid()
             assert self.mirror_info.title
+            assert self.mirror_info.url
             assert self.mirror_info.song_count
             assert self.mirror_info.etag
+            assert self.mirror_info.mirror_creation_time
         except AssertionError as e:
             print("couldnt validate playlist url\n",e)
             return None
@@ -94,18 +92,20 @@ class MirrorController:
 
     
     def _read_mirror_info_file(self):
-        if
+        try:
+            with open(self.mirror_info_filepath, "r", encoding="utf+8") as f:
+                stored_mirror_info = json.load(f)
+        except FileNotFoundError as e:
+            fp :Path = self.mirror_info_filepath
+            print(e(f"mirror info file {fp} does not exist"))
 
 
-        with open(self.mirror_info_filepath, "r", encoding="utf+8") as f:
-            stored_mirror_info = json.load(f)
 
         self.mirror_info.title = stored_mirror_info["title"]
         self.mirror_info.url = stored_mirror_info["url"]
         self.mirror_info.song_count = stored_mirror_info["song_count"]
         self.mirror_info.etag = stored_mirror_info["etag"]
         self.mirror_info.mirror_creation_time = stored_mirror_info["mirror_creation_time"]
-        self.mirror_info.mirror_last_updated = stored_mirror_info["mirror_last_updated"]
 
 
     def _write_mirror_info_file(self):
@@ -121,5 +121,7 @@ class MirrorController:
         self._yt_api.sync_playlist_info()
 
         self.mirror_info.title = self._yt_api.title
+        self.mirror_info.url = self._yt_api._playlist_url
         self.mirror_info.song_count = self._yt_api.song_count
         self.mirror_info.etag = self._yt_api.etag
+        self.mirror_info.mirror_creation_time = self.action_time

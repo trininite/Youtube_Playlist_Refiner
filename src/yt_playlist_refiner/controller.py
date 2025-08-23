@@ -190,6 +190,11 @@ class Controller:
             print("Please create them before proceeding.")
             raise FileExistsError
 
+    def _load_api_key(self):
+        api_file_path = "src/api_secrets/DEV_YTAPI_SECRET.txt"
+        with open(api_file_path, mode="r", encoding="UTF+8") as f:
+            self._api_key = f.readlines[0]
+
 
     def _create_mirror(self):
         # assumptions:
@@ -197,19 +202,8 @@ class Controller:
         #   new mirror doesnt exist yet
         #   user has provided a valid api key
 
-
-        # temp api key loading
-        # should switch to loader function ASAP
-        # better yet switch to oauth2 authentication (painful (help))
-        api_file_path = "src/api_secrets/DEV_YTAPI_SECRET.txt"
-        with open(api_file_path, mode="r", encoding="UTF+8") as f:
-            api_key = f.readlines[0]
-
-        print(api_key)
-        worked = input("did it work? y/n")
-        if not worked.lower() == "y":
-            raise UnicodeDecodeError(api_key)
-        # ^^ temp ^^ #
+        # switch to oauth2 authentication (painful (help))
+        self._load_api_key()
 
         #TODO start using pathlib everywhere 
         #new_mirror_folder_path :Path = get_new_mirror_path()
@@ -217,7 +211,7 @@ class Controller:
         new_mirror_parent_path :str = get_new_mirror_path()
 
 
-        yt_api = YoutubeAPI(api_key, new_mirror_playlist_url)
+        yt_api = YoutubeAPI(self._api_key, new_mirror_playlist_url)
         playlist_title = yt_api.title
         song_count = yt_api.song_count
         etag = yt_api.etag
@@ -232,9 +226,10 @@ class Controller:
 
         mirror_con = MirrorController(
             mirror_path=new_mirror_parent_path,
-            api_key=api_key,
+            api_key=self._api_key,
             action_time=self.action_time,
             playlist_url=new_mirror_playlist_url
         )
 
-
+        cache_man.add_mirror_path(new_mirror_path)
+        cache_man._update_cache()
