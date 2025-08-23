@@ -2,12 +2,10 @@
 from os import path as os_path
 
 from enum import Enum
-from dataclasses import dataclass, asdict
 
 from datetime import datetime
 
 from utils import yes_no, resolve_path, valid_path
-
 
 from mirror_cache import CacheManager
 
