@@ -1,3 +1,5 @@
+
+"""
 #!usr/bin/env python3
 
 # standard
@@ -6,8 +8,11 @@ from datetime import datetime
 # custom
 from cli import startup_dialogue
 from cli import mirror_update_dialogue
+from cli import get_mirror_path
+from cli import get_playlist_url
 
-from mirror_utils import create_mirror
+
+#from mirror_utils import create_mirror
 
 from mirror_utils import run_name_updater
 from mirror_utils import cache_check
@@ -28,8 +33,8 @@ def main() -> None:
         # also creates the INITIAL song list, doesn't look for duplicates
         
         case 1:
-            mirror_path = create_mirror(action_time)
-
+            playlist_url = get_playlist_url()
+            mirror_path = get_mirror_path()
 
         # mirror update
         case 2:
@@ -76,6 +81,6 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
+"""
 
 # on this day, gta VI was delayed"""
